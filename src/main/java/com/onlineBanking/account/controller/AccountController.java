@@ -15,11 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.onlineBanking.account.entity.Account;
 import com.onlineBanking.account.exception.AccountApplicationException;
 import com.onlineBanking.account.request.CreateAccountRequestDto;
+import com.onlineBanking.account.request.UpdateBalanceRequestDto;
 import com.onlineBanking.account.service.AccountService;
 
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("/api/v1/")
 public class AccountController {
 	
 	private final AccountService accountService;
@@ -30,25 +31,26 @@ public class AccountController {
 	}
 
 
-	@PostMapping("/create-account")
+	@PostMapping("account")
 	ResponseEntity<String> createAccount(@RequestBody CreateAccountRequestDto request) throws AccountApplicationException{
+		System.out.println("userID inside acc-ms-cont : "+request.getUserId());
 	    String response = accountService.createAccount(request.getUserId(), request.getAccountType());
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 	
-    @GetMapping("get-accounts")
-    public ResponseEntity<List<Account>> getAllStudentMarks() {
-        List<Account> studentMarksList = accountService.getAllAccounts();
-        if (studentMarksList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(studentMarksList);
+    @GetMapping
+    public ResponseEntity<List<Account>> getAllAccounts() {
+        List<Account> allAccounts = accountService.getAllAccounts();
+        if (allAccounts.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(allAccounts);
         }
-        return ResponseEntity.ok(studentMarksList);
+        return ResponseEntity.ok(allAccounts);
     }
 	
 
 	@PatchMapping("/update-balance")
-	ResponseEntity<String> updateBalance(){
-		String response = accountService.updateBalance();
+	ResponseEntity<String> updateBalance(@RequestBody UpdateBalanceRequestDto updateBalanceRequestDto) throws AccountApplicationException{
+		String response = accountService.updateBalance(updateBalanceRequestDto.getUserId(),updateBalanceRequestDto.getAmount(),updateBalanceRequestDto.getTransactionType());
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }

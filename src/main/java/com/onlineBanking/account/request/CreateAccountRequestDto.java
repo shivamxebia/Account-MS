@@ -2,16 +2,16 @@ package com.onlineBanking.account.request;
 
 public class CreateAccountRequestDto {
 
-    private String userId;
+    private Long userId;
     private String accountType;
 
     // Getters and Setters
 
-    public String getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

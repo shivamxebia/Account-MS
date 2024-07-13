@@ -6,9 +6,9 @@ import com.onlineBanking.account.entity.Account;
 import com.onlineBanking.account.exception.AccountApplicationException;
 
 public interface AccountService {
-	String updateBalance();
+	String updateBalance(Long userId, Long amount, String transactionType) throws AccountApplicationException;
 
-	String createAccount(String userId, String accountType) throws AccountApplicationException;
+	String createAccount(Long userId, String accountType) throws AccountApplicationException;
 
 	List<Account> getAllAccounts();
 }

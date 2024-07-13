@@ -1,13 +1,13 @@
 package com.onlineBanking.account.request;
 
 public class CardRequestDto {
-	private String userId;
+	private Long userId;
 	private String accountType;
 	
-	public String getUserId() {
+	public Long getUserId() {
 		return userId;
 	}
-	public void setUserId(String userId) {
+	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
 	public String getAccountType() {

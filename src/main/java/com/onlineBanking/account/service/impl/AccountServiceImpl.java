@@ -30,11 +30,7 @@ public class AccountServiceImpl implements AccountService{
     @Value("${onlineBanking.card.url}")
     private String cardServiceEndpointUrl;
 
-	@Override
-	public String updateBalance() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 
 	public Long generateAccountNumberUtil(){
 	    Long accountNumber;
@@ -45,8 +41,10 @@ public class AccountServiceImpl implements AccountService{
 	}
 	
 	@Override
-	public String createAccount(String userId, String accountType) throws AccountApplicationException {
+	public String createAccount(Long userId, String accountType) throws AccountApplicationException {
 		// TODO Auto-generated method stub
+		
+		System.out.println("userID inside acc-ms : "+userId);
 		if(accountRepository.findByUserId(userId)!=null) {
 			throw new AccountApplicationException(HttpStatus.CONFLICT,"User Account already exists. Please choose a different userId");
 		}
@@ -57,15 +55,17 @@ public class AccountServiceImpl implements AccountService{
 		Long accountNumber = generateAccountNumberUtil();
 		
 		account.setAccountNo(accountNumber);
-		accountRepository.save(account);
 		
-		String createCardUrl = cardServiceEndpointUrl+"/api/v1/create-card"; 
+		
+		String createCardUrl = "http://localhost:8082/api/v1/card"; 
+		System.out.println("URL CARD : "+createCardUrl);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
         
      // Create request payload
         CardRequestDto requestPayload = new CardRequestDto();
         requestPayload.setUserId(userId);
+        System.out.println(requestPayload.getUserId());
         requestPayload.setAccountType(accountType);
 
         HttpEntity<CardRequestDto> requestEntity = new HttpEntity<>(requestPayload, headers);
@@ -73,9 +73,11 @@ public class AccountServiceImpl implements AccountService{
         // Send POST request to the card service
         ResponseEntity<String> responseEntity =restTemplate.exchange(createCardUrl, HttpMethod.POST, requestEntity, String.class);
 		
+		if(responseEntity.getStatusCode()!= HttpStatus.OK) {
+			throw new AccountApplicationException(HttpStatus.CONFLICT,"Failed Card Generation");
+		}
 		
-		
-		
+		accountRepository.save(account);
 		return "Account created successfully for user " + userId + " with account type " + accountType;
 	}
 
@@ -84,6 +86,26 @@ public class AccountServiceImpl implements AccountService{
 		// TODO Auto-generated method stub
 		
 		return accountRepository.findAll();
+	}
+
+	@Override
+	public String updateBalance(Long userId, Long amount, String transactionType) throws AccountApplicationException {
+		// TODO Auto-generated method stub
+		Account account = accountRepository.findByUserId(userId);
+		if(account==null) {
+			throw new AccountApplicationException(HttpStatus.NOT_FOUND, "Account doesn't exist with userId"+userId);
+		}
+		
+		//Transaction Type = "DEBITED" or "CREDITED"
+		
+		if(transactionType=="DEBITED") {
+			account.setBalance(account.getBalance()-amount);
+		}else {
+			account.setBalance(account.getBalance()+amount);
+		}
+		accountRepository.save(account);
+		
+		return "Account Balance Updated Successfully!!";
 	}
 
 }
